@@ -9,6 +9,9 @@ name: Build
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      UPDATE_SERVER_HOST: ${{ secrets.UPDATE_SERVER_HOST }}
+      UPDATE_SERVER_API_KEY: ${{ secrets.UPDATE_SERVER_API_KEY }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -52,9 +55,7 @@ jobs:
           cp .pio/build/controller/partitions.bin upload/controller/partitions.bin
           cp .pio/build/controller/bootloader.bin upload/controller/bootloader.bin
       - uses: ./.github/actions/upload-firmware
-        env:
-          UPDATE_SERVER_HOST: ${{ secrets.UPDATE_SERVER_HOST }}
-          UPDATE_SERVER_API_KEY: ${{ secrets.UPDATE_SERVER_API_KEY }}
+        if: env.UPDATE_SERVER_HOST != ''
         with:
           channel: 'stable'
           target: 'controller'
@@ -76,9 +77,7 @@ jobs:
           cp .pio/build/display/partitions.bin upload/display/partitions.bin
           cp .pio/build/display/bootloader.bin upload/display/bootloader.bin
       - uses: ./.github/actions/upload-firmware
-        env:
-          UPDATE_SERVER_HOST: ${{ secrets.UPDATE_SERVER_HOST }}
-          UPDATE_SERVER_API_KEY: ${{ secrets.UPDATE_SERVER_API_KEY }}
+        if: env.UPDATE_SERVER_HOST != ''
         with:
           channel: 'stable'
           target: 'display'
@@ -94,9 +93,7 @@ jobs:
           cp .pio/build/display-headless/partitions.bin upload/headless/partitions.bin
           cp .pio/build/display-headless/bootloader.bin upload/headless/bootloader.bin
       - uses: ./.github/actions/upload-firmware
-        env:
-          UPDATE_SERVER_HOST: ${{ secrets.UPDATE_SERVER_HOST }}
-          UPDATE_SERVER_API_KEY: ${{ secrets.UPDATE_SERVER_API_KEY }}
+        if: env.UPDATE_SERVER_HOST != ''
         with:
           channel: 'stable'
           target: 'headless'
