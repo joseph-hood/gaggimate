@@ -18,7 +18,7 @@ UART_RX_CHAR_UUID = "fe590002-54ae-4a28-9f74-dfccb248601d"
 UART_TX_CHAR_UUID = "fe590003-54ae-4a28-9f74-dfccb248601d"
 
 PART = 19000
-MTU = 250
+MTU = 100
 
 ble_ota_dfu_end = False
 
@@ -202,12 +202,19 @@ def is_valid_address(value: str = None) -> bool:
 
 
 if __name__ == "__main__":
+
+    BLE_ADDRESS = "A0:85:E3:F3:0E:89"
+    FILENAME = ".pio/build/controller/firmware.bin"
+
     print(header)
-    # Check if the user has entered enough arguments
-    # sys.argv.append("C8:C9:A3:D2:60:8E")
-    # sys.argv.append("firmware.bin")
+
+    if len(sys.argv) == 1:
+
+        sys.argv.append(BLE_ADDRESS)
+        sys.argv.append(FILENAME)
 
     if len(sys.argv) < 3:
+
         print("Specify the device address and firmware file")
         import sys
         import os
