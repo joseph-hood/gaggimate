@@ -169,6 +169,9 @@ class Controller {
     bool steamReady = false;
     bool sdcard = false;
     int error = 0;
+#ifdef GAGGIMATE_DEMO
+    unsigned long lastDemoTick = 0;
+#endif
 
     // Bluetooth scale connection monitoring
     VolumetricMeasurementSource currentVolumetricSource = VolumetricMeasurementSource::INACTIVE;

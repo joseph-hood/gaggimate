@@ -109,7 +109,15 @@ void Controller::connect() {
     pluginManager->trigger("controller:startup");
 
     setupWifi();
+#ifndef GAGGIMATE_DEMO
     setupBluetooth();
+#else
+    systemInfo = {"demo", "v0.0.0", {true, true, false, false}};
+    if (!loaded) {
+        loaded = true;
+        pluginManager->trigger("controller:ready");
+    }
+#endif
     pluginManager->on("ota:update:start", [this](Event const &) { this->updating = true; });
     pluginManager->on("ota:update:end", [this](Event const &) { this->updating = false; });
 
@@ -305,6 +313,7 @@ void Controller::loop() {
 
     unsigned long now = millis();
 
+#ifndef GAGGIMATE_DEMO
     // If BLE scanning has been running for a while without finding the controller,
     // notify the UI so it can update the startup label accordingly.
     if (!waitingForController && initialized && !clientController.isConnected() &&
@@ -329,6 +338,21 @@ void Controller::loop() {
         }
         pluginManager->trigger("controller:bluetooth:connect");
     }
+#else
+    if (initialized && now - lastDemoTick > 100) {
+        lastDemoTick = now;
+        float target = getTargetTemp();
+        if (currentTemp < target - 0.05f)       currentTemp += 0.1f;
+        else if (currentTemp > target + 0.05f)  currentTemp -= 0.1f;
+        if (isActive()) {
+            pressure        = 9.0f  + 0.3f  * sinf(now / 1200.0f);
+            currentPumpFlow = 2.0f  + 0.2f  * sinf(now / 1700.0f);
+            currentPuckFlow = 1.8f  + 0.15f * sinf(now / 2100.0f);
+        } else {
+            pressure = currentPumpFlow = currentPuckFlow = 0.0f;
+        }
+    }
+#endif
 
     if (isErrorState()) {
         return;
@@ -389,9 +413,11 @@ void Controller::loop() {
 }
 
 void Controller::loopControl() {
+#ifndef GAGGIMATE_DEMO
     if (initialized) {
         updateControl();
     }
+#endif
 }
 
 bool Controller::isUpdating() const { return updating; }
@@ -401,7 +427,9 @@ bool Controller::isAutotuning() const { return autotuning; }
 bool Controller::isReady() const { return !isUpdating() && !isErrorState() && !isAutotuning(); }
 
 bool Controller::isVolumetricAvailable() const {
-#ifdef NIGHTLY_BUILD
+#ifdef GAGGIMATE_DEMO
+    return true;
+#elif defined(NIGHTLY_BUILD)
     return isBluetoothScaleHealthy() || systemInfo.capabilities.dimming;
 #else
     return isBluetoothScaleHealthy();
